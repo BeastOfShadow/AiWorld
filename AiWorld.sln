@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36301.6 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "aiworld.client", "aiworld.client\aiworld.client.esproj", "{F28341E8-A5BA-88BF-ADE0-970BDC25DF54}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiWorld.Server", "AiWorld.Server\AiWorld.Server.csproj", "{C0F9E199-9EEB-47BE-85C0-7C2B8ECC4DC7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F28341E8-A5BA-88BF-ADE0-970BDC25DF54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F28341E8-A5BA-88BF-ADE0-970BDC25DF54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F28341E8-A5BA-88BF-ADE0-970BDC25DF54}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{F28341E8-A5BA-88BF-ADE0-970BDC25DF54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F28341E8-A5BA-88BF-ADE0-970BDC25DF54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F28341E8-A5BA-88BF-ADE0-970BDC25DF54}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{C0F9E199-9EEB-47BE-85C0-7C2B8ECC4DC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0F9E199-9EEB-47BE-85C0-7C2B8ECC4DC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0F9E199-9EEB-47BE-85C0-7C2B8ECC4DC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0F9E199-9EEB-47BE-85C0-7C2B8ECC4DC7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9BA597E6-9501-423E-A482-5C79E71C990B}
+	EndGlobalSection
+EndGlobal
