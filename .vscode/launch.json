@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Backend",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/AiWorld.Server/bin/Debug/net9.0/AiWorld.Server.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/AiWorld.Server",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "Launch Frontend",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/aiworld.client/src"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug Full Stack",
+      "configurations": ["Launch Backend", "Launch Frontend"]
+    }
+  ]
+}
