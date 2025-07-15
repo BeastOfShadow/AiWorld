@@ -15,3 +15,19 @@ export async function getChats() {
         return [];
     }
 }
+
+export async function createChat(chatData) {
+    const response = await fetch('/api/Chat/CreateChat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(chatData)
+    });
+
+    if (!response.ok) {
+        throw new Error(`Errore ${response.status}: ${response.statusText}`);
+    }
+
+    return await response.json();
+}

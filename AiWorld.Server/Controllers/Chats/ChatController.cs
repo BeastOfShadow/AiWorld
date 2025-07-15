@@ -34,4 +34,20 @@ public class ChatController : ControllerBase
             return StatusCode(500, "Errore interno del server");
         }
     }
+
+    [HttpPost("CreateChat")]
+    public async Task<ActionResult<Chat>> CreateChat([FromBody] Chat chat)
+    {
+        _context.Chats.Add(chat);
+        await _context.SaveChangesAsync();
+        return CreatedAtAction(nameof(GetChats), new { id = chat.Id }, chat);
+    }
+
+    [HttpPost("DeleteChat")]
+    public async Task<ActionResult<Chat>> DeleteChat([FromBody] int id)
+    {
+        _context.Chats.Remove(chat);
+        await _context.SaveChangesAsync();
+        return CreatedAtAction(nameof(GetChats), new { id = chat.Id }, chat);
+    }
 }

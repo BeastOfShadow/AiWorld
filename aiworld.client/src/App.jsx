@@ -5,7 +5,7 @@ import {
 
 import Sidebar from "./components/sidebar/sidebar.jsx";
 import ChatArea from "./components/main-chat-area/chat-area.jsx";
-import { getChats } from "./functions/chats/chat-functions.jsx";
+import { getChats, createChat } from "./functions/chats/chat-functions.jsx";
 
 const App = () => {
   const [chats, setChats] = useState([]);
@@ -89,7 +89,6 @@ const App = () => {
       setMessages((prev) => [...prev, aiMessage]);
       setIsLoading(false);
 
-      // Aggiorna preview chat
       setChats((prev) =>
         prev.map((chat) =>
           chat.id === currentChatId
@@ -104,18 +103,21 @@ const App = () => {
     }, 1500);
   };
 
-  const createNewChat = () => {
+  const createNewChat = async () => {
     const newChat = {
-      id: Date.now(),
       title: `New Chat ${chats.length + 1}`,
       createdAt: new Date().toISOString(),
       lastAccessed: new Date().toISOString(),
       preview: "New conversation...",
       modelUsed: "Llama-3.1-8B",
     };
-
-    setChats((prev) => [newChat, ...prev]);
-    setCurrentChatId(newChat.id);
+    try {
+      const savedChat = await createChat(newChat); // Chiami l'API che restituisce l'oggetto con l'ID
+      setChats((prev) => [savedChat, ...prev]);
+      setCurrentChatId(savedChat.id); // Ora esiste l'ID
+    } catch (error) {
+      console.error("Errore nella creazione della chat:", error);
+    }
   };
 
   const deleteChat = (chatId) => {
