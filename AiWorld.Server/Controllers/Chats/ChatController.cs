@@ -43,11 +43,15 @@ public class ChatController : ControllerBase
         return CreatedAtAction(nameof(GetChats), new { id = chat.Id }, chat);
     }
 
-    [HttpPost("DeleteChat")]
-    public async Task<ActionResult<Chat>> DeleteChat([FromBody] int id)
+    [HttpDelete("DeleteChat/{id}")]
+    public async Task<ActionResult<Chat>> DeleteChat(int id)
     {
+        var chat = await _context.Chats.FindAsync(id);
+        if (chat == null) return NotFound();
+
         _context.Chats.Remove(chat);
         await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetChats), new { id = chat.Id }, chat);
+
+        return NoContent();
     }
 }

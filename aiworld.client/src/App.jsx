@@ -112,26 +112,40 @@ const App = () => {
       modelUsed: "Llama-3.1-8B",
     };
     try {
-      const savedChat = await createChat(newChat); // Chiami l'API che restituisce l'oggetto con l'ID
+      const savedChat = await createChat(newChat);
       setChats((prev) => [savedChat, ...prev]);
-      setCurrentChatId(savedChat.id); // Ora esiste l'ID
+      setCurrentChatId(savedChat.id);
     } catch (error) {
       console.error("Errore nella creazione della chat:", error);
     }
   };
 
-  const deleteChat = (chatId) => {
+  const deleteChat = async (chatId) => {
     if (chats.length === 1) return;
 
-    setChats((prev) => prev.filter((chat) => chat.id !== chatId));
-    setMessages((prev) => prev.filter((msg) => msg.chatId !== chatId));
+    try {
+      const response = await fetch(`/api/Chat/DeleteChat/${chatId}`, {
+        method: 'DELETE',
+      });
 
-    if (currentChatId === chatId) {
-      setCurrentChatId(
-        chats.find((chat) => chat.id !== chatId)?.id || chats[0]?.id
-      );
+      if (!response.ok) {
+        throw new Error(`Errore ${response.status}: ${response.statusText}`);
+      }
+
+      setChats((prev) => prev.filter((chat) => chat.id !== chatId));
+      setMessages((prev) => prev.filter((msg) => msg.chatId !== chatId));
+
+      if (currentChatId === chatId) {
+        setCurrentChatId(
+          chats.find((chat) => chat.id !== chatId)?.id || chats[0]?.id
+        );
+      }
+
+    } catch (error) {
+      console.error("Errore nella cancellazione della chat:", error);
     }
   };
+
 
   const startEditingChat = (chatId, currentTitle) => {
     setEditingChatId(chatId);
