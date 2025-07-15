@@ -20,9 +20,6 @@ const ChatAreaHeader = ({ CurrentChat, SetSidebarOpen, SidebarOpen }) => {
         )}
 
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-            <Star className="w-4 h-4 text-white" />
-          </div>
           <div>
             <h2 className="font-semibold text-white">
               {CurrentChat?.title || "Seleziona una chat"}
