@@ -413,3 +413,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+AiWorld.db-shm
+AiWorld.db
+AiWorld.db-wal
