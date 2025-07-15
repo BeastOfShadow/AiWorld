@@ -13,13 +13,17 @@ public class ChatConfiguration : IEntityTypeConfiguration<Chat>
 
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Name)
+        builder.Property(x => x.Title)
             .IsRequired();
 
-        builder.Property(x => x.ModelName)
-                .IsRequired();
+        builder.Property(x => x.ModelUsed)
+            .IsRequired();
 
-        builder.Property(x => x.UpdatedAt)
-                .IsRequired();
+        builder.Property(x => x.Preview);
+
+        builder.Property(x => x.CreatedAt)
+            .IsRequired();
+
+        builder.Property(x => x.LastAccessed);
     }
 }

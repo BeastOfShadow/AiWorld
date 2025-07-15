@@ -5,7 +5,9 @@ namespace AiWorld.Server.Models.Chats;
 public class Chat
 {
     public int Id { get; set; }
-    public string Name { get; set; } 
-    public string ModelName { get; set; }
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public string Title { get; set; } 
+    public string ModelUsed { get; set; }
+    public string Preview { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime LastAccessed { get; set; } = DateTime.UtcNow;
 }
