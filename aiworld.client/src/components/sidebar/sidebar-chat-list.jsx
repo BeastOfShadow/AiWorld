@@ -1,20 +1,8 @@
 import React from 'react'; // Aggiungi l'import di React
 import {
-  Search,
-  Plus,
   Edit3,
   Trash2,
-  Send,
-  Menu,
-  X,
-  Star,
-  MessageCircle,
   Calendar,
-  Share2,
-  Download,
-  Settings,
-  Moon,
-  Sun,
 } from "lucide-react";
 
 const SidebarChatList = ({ 

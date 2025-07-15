@@ -5,26 +5,19 @@ import {
 
 import Sidebar from "./components/sidebar/sidebar.jsx";
 import ChatArea from "./components/main-chat-area/chat-area.jsx";
+import { getChats } from "./functions/chats/chat-functions.jsx";
 
 const App = () => {
-  const [chats, setChats] = useState([
-    {
-      id: 1,
-      title: "Benvenuto in AIWorld",
-      createdAt: new Date().toISOString(),
-      lastAccessed: new Date().toISOString(),
-      preview: "Ciao! Sono il tuo assistente AI personale...",
-      modelUsed: "Llama-3.1-8B",
-    },
-    {
-      id: 2,
-      title: "Programmazione Python",
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      lastAccessed: new Date(Date.now() - 3600000).toISOString(),
-      preview: "Puoi aiutarmi con un algoritmo di sorting?",
-      modelUsed: "CodeLlama-7B",
-    },
-  ]);
+  const [chats, setChats] = useState([]);
+
+  useEffect(() => {
+    const loadChats = async () => {
+      const chatsData = await getChats();
+      setChats(chatsData);
+    };
+
+    loadChats();
+  }, []);
 
   const [messages, setMessages] = useState([
     {
@@ -114,10 +107,10 @@ const App = () => {
   const createNewChat = () => {
     const newChat = {
       id: Date.now(),
-      title: `Nuova Chat ${chats.length + 1}`,
+      title: `New Chat ${chats.length + 1}`,
       createdAt: new Date().toISOString(),
       lastAccessed: new Date().toISOString(),
-      preview: "Nuova conversazione...",
+      preview: "New conversation...",
       modelUsed: "Llama-3.1-8B",
     };
 
@@ -185,8 +178,8 @@ const App = () => {
           >
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isUser
-                  ? "bg-gradient-to-br from-blue-500 to-purple-600"
-                  : "bg-gradient-to-br from-purple-500 to-pink-500"
+                ? "bg-gradient-to-br from-blue-500 to-purple-600"
+                : "bg-gradient-to-br from-purple-500 to-pink-500"
                 }`}
             >
               {isUser ? (
@@ -198,8 +191,8 @@ const App = () => {
 
             <div
               className={`rounded-2xl px-4 py-3 shadow-lg ${isUser
-                  ? "bg-gradient-to-br from-blue-500 to-purple-600 text-white"
-                  : "bg-gray-800 text-gray-100 border border-gray-700"
+                ? "bg-gradient-to-br from-blue-500 to-purple-600 text-white"
+                : "bg-gray-800 text-gray-100 border border-gray-700"
                 }`}
             >
               <div className="prose prose-invert max-w-none">
