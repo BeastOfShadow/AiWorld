@@ -6,16 +6,14 @@ export async function getSettings() {
             throw new Error(`Errore ${response.status}: ${response.statusText}`);
         }
         
-        const data = await response.json();
-        console.log("Response:", data);
-        return data;
+        return await response.text();
     } catch (error) {
         console.error("Errore nel caricamento dei settings:", error);
         return [];
     }
 }
 
-export async function getModelName() {
+export async function GetModelName() {
     try {
         const response = await fetch('/api/Settings/GetModelName');
         
