@@ -25,7 +25,7 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
                 .IsRequired();
 
         builder.HasOne(x => x.Chat)
-            .WithMany()
+            .WithMany(c => c.Messages)
             .HasForeignKey(x => x.ChatId)
             .IsRequired();
     }

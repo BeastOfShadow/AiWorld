@@ -10,4 +10,6 @@ public class Chat
     public string Preview { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime LastAccessed { get; set; } = DateTime.UtcNow;
+
+    public IEnumerable<Message> Messages { get; set; }
 }
