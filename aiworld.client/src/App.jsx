@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Star,
-} from "lucide-react";
+import { X, Star, Settings, User, Sun, Moon, ChevronRight, CpuIcon } from "lucide-react";
 
 import Sidebar from "./components/sidebar/sidebar.jsx";
 import ChatArea from "./components/main-chat-area/chat-area.jsx";
@@ -9,6 +7,9 @@ import { getChats, createChat } from "./functions/chats/chat-functions.jsx";
 
 const App = () => {
   const [chats, setChats] = useState([]);
+  const [showSettings, setShowSettings] = useState(false);
+
+  const [activeModalSection, setActiveModalSection] = useState('general');
 
   useEffect(() => {
     const loadChats = async () => {
@@ -280,6 +281,8 @@ const App = () => {
           formatDate={formatDate}
           isDarkMode={isDarkMode}
           setIsDarkMode={setIsDarkMode}
+          showSettings={showSettings}
+          setShowSettings={setShowSettings}
         />
 
         {/* Main Chat Area */}
@@ -298,6 +301,170 @@ const App = () => {
           currentMessages={currentMessages}
         />
       </div>
+      {/* Modale */}
+      {showSettings && (
+        <>
+          {/* Overlay scuro */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setShowSettings(false)}
+          />
+
+          {/* Modale migliorato */}
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="bg-gray-900 text-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 flex overflow-hidden">
+              {/* Sidebar del modale */}
+              <div className="w-1/3 bg-gray-800 p-4 border-r border-gray-700">
+                <h2 className="text-lg font-semibold mb-6">Settings</h2>
+
+                {/* <button
+                  onClick={() => setActiveModalSection('profile')}
+                  className={`flex items-center justify-between w-full p-3 rounded-lg mb-2 ${activeModalSection === 'profile' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+                >
+                  <div className="flex items-center">
+                    <User className="w-4 h-4 mr-3" />
+                    <span>Profilo</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4" />
+                </button> */}
+
+                <button
+                  onClick={() => setActiveModalSection('general')}
+                  className={`flex items-center justify-between w-full p-3 rounded-lg mb-2 ${activeModalSection === 'general' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+                >
+                  <div className="flex items-center">
+                    <Settings className="w-4 h-4 mr-3" />
+                    <span>General</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={() => setActiveModalSection('model_setup')}
+                  className={`flex items-center justify-between w-full p-3 rounded-lg mb-2 ${activeModalSection === 'settings' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+                >
+                  <div className="flex items-center">
+                    <CpuIcon className="w-4 h-4 mr-3" />
+                    <span>Model Setup</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Contenuto principale */}
+              <div className="w-2/3 p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-semibold">
+                    {activeModalSection === 'profile' && 'Profilo'}
+                    {activeModalSection === 'general' && 'General Settings'}
+                    {activeModalSection === 'model_setup' && 'Model Setup'}
+                  </h3>
+                  <button
+                    onClick={() => setShowSettings(false)}
+                    className="p-1 hover:bg-gray-800 rounded-full"
+                  >
+                    <X className="w-5 h-5 text-gray-400 hover:text-white" />
+                  </button>
+                </div>
+
+                {/* Contenuto dinamico in base alla sezione */}
+                <div className="space-y-6">
+                  {/* {activeModalSection === 'profile' && (
+                    <div>
+                      <h4 className="text-md font-medium mb-4">Informazioni personali</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-1">Nome</label>
+                          <input
+                            type="text"
+                            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                            placeholder="Il tuo nome"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-1">Email</label>
+                          <input
+                            type="email"
+                            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                            placeholder="tua@email.com"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )} */}
+
+                  {activeModalSection === 'general' && (
+                    <div>
+                      <h4 className="text-md font-medium mb-4">Preferenes</h4>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <label className="block text-sm text-gray-400 mb-1">Theme</label>
+                            <p className="text-sm text-gray-300">Choose between light or dark</p>
+                          </div>
+                          <button
+                            onClick={() => setIsDarkMode(!isDarkMode)}
+                            className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg"
+                          >
+                            {isDarkMode ? (
+                              <>
+                                <Sun className="w-4 h-4" />
+                                <span>Light</span>
+                              </>
+                            ) : (
+                              <>
+                                <Moon className="w-4 h-4" />
+                                <span>Dark</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModalSection === 'model_setup' && (
+                    <div>
+                      <h4 className="text-md font-medium mb-4">AI Configuration</h4>
+                      <div className="space-y-4">
+                        <div>
+                          {/* <label className="block text-sm text-gray-400 mb-1">Model Selection</label> */}
+                          {/* <select className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white">
+                            <option>Llama-3.1-8B</option>
+                            <option>Mistral-7B</option>
+                            <option>GPT-4</option>
+                          </select> */}
+                          <label className="block text-sm text-gray-400 mb-1">Model Name</label>
+                          <input
+                            type="text"
+                            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                            placeholder="Llama-3.1-8B"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-1">Endpoint API</label>
+                          <input
+                            type="text"
+                            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                            placeholder="http://localhost:11434"
+                          />
+                        </div>
+
+                        <div className="pt-2">
+                          <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg">
+                            Save Configuration
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

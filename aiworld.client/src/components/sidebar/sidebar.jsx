@@ -24,6 +24,8 @@ const Sidebar = ({
   formatDate,
   isDarkMode,
   setIsDarkMode,
+  showSettings,
+  setShowSettings
 }) => {
   return (
     <div
@@ -56,7 +58,11 @@ const Sidebar = ({
         />
 
         {/* Footer */}
-        <SidebarFooter IsDarkMode={isDarkMode} SetIsDarkMode={setIsDarkMode} />
+        <SidebarFooter 
+          isDarkMode={isDarkMode} 
+          setIsDarkMode={setIsDarkMode} 
+          setShowSettings={setShowSettings}
+        />
       </div>
     </div>
   );
