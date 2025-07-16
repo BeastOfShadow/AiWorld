@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { X, Star, Settings, User, Sun, Moon, ChevronRight, CpuIcon } from "lucide-react";
+import { X, Star, Settings, User, Sun, Moon, ChevronRight, CpuIcon, Link, Brain } from "lucide-react";
 
 import Sidebar from "./components/sidebar/sidebar.jsx";
 import ChatArea from "./components/main-chat-area/chat-area.jsx";
 import { getChats, createChat } from "./functions/chats/chat-functions.jsx";
+import { getModels } from "./functions/application-settings/models-function.jsx"
 
 const App = () => {
   const [chats, setChats] = useState([]);
@@ -11,12 +12,46 @@ const App = () => {
 
   const [activeModalSection, setActiveModalSection] = useState('general');
 
+  const [models, setModels] = useState([]);
+  const [newModel, setNewModel] = useState("");
+
+  const addModel = () => {
+    if (newModel.trim() && !models.includes(newModel.trim())) {
+      setModels([...models, newModel.trim()]);
+      setNewModel("");
+    }
+  };
+
+  const removeModel = (modelToRemove) => {
+    setModels(models.filter(m => m !== modelToRemove));
+  };
+
+  const [endpoints, setEndpoints] = useState([]);
+  const [newEndpoint, setNewEndpoint] = useState("");
+
+  const addEndpoint = () => {
+    if (newEndpoint.trim() && !endpoints.includes(newEndpoint.trim())) {
+      setEndpoints([...endpoints, newEndpoint.trim()]);
+      setNewEndpoint("");
+    }
+  };
+
+  const removeEndpoint = (modelToRemove) => {
+    setEndpoints(endpoints.filter(m => m !== modelToRemove));
+  };
+
   useEffect(() => {
+    const fetchModels = async () => {
+      const allModels = await getModels();
+      setModels(allModels);
+    };
+
     const loadChats = async () => {
       const chatsData = await getChats();
       setChats(chatsData);
     };
 
+    fetchModels();
     loadChats();
   }, []);
 
@@ -300,6 +335,7 @@ const App = () => {
           currentMessages={currentMessages}
         />
       </div>
+
       {/* Modale */}
       {showSettings && (
         <>
@@ -339,12 +375,34 @@ const App = () => {
                 </button>
 
                 <button
-                  onClick={() => setActiveModalSection('model_setup')}
-                  className={`flex items-center justify-between w-full p-3 rounded-lg mb-2 ${activeModalSection === 'settings' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+                  onClick={() => setActiveModalSection('connection')}
+                  className={`flex items-center justify-between w-full p-3 rounded-lg mb-2 ${activeModalSection === 'connection' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
                 >
                   <div className="flex items-center">
                     <CpuIcon className="w-4 h-4 mr-3" />
-                    <span>Model Setup</span>
+                    <span>Connection</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={() => setActiveModalSection('model')}
+                  className={`flex items-center justify-between w-full p-3 rounded-lg mb-2 ${activeModalSection === 'model' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+                >
+                  <div className="flex items-center">
+                    <Brain className="w-4 h-4 mr-3" />
+                    <span>Models</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={() => setActiveModalSection('endpoint')}
+                  className={`flex items-center justify-between w-full p-3 rounded-lg mb-2 ${activeModalSection === 'endpoint' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+                >
+                  <div className="flex items-center">
+                    <Link className="w-4 h-4 mr-3" />
+                    <span>Endpoint</span>
                   </div>
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -356,7 +414,9 @@ const App = () => {
                   <h3 className="text-lg font-semibold">
                     {activeModalSection === 'profile' && 'Profilo'}
                     {activeModalSection === 'general' && 'General Settings'}
-                    {activeModalSection === 'model_setup' && 'Model Setup'}
+                    {activeModalSection === 'connection' && 'Connection Setup'}
+                    {activeModalSection === 'model' && 'Model Settings'}
+                    {activeModalSection === 'endpoint' && 'Endpoint Settings'}
                   </h3>
                   <button
                     onClick={() => setShowSettings(false)}
@@ -422,9 +482,9 @@ const App = () => {
                     </div>
                   )}
 
-                  {activeModalSection === 'model_setup' && (
+                  {activeModalSection === 'connection' && (
                     <div>
-                      <h4 className="text-md font-medium mb-4">AI Configuration</h4>
+                      <h4 className="text-md font-medium mb-4">Connection Configuration</h4>
                       <div className="space-y-4">
                         <div>
                           {/* <label className="block text-sm text-gray-400 mb-1">Model Selection</label> */}
@@ -456,7 +516,107 @@ const App = () => {
                           </button>
                         </div>
                       </div>
-                      <h4 className="text-md font-medium mb-4 mt-4">CRUD Model Name</h4>
+                    </div>
+                  )}
+
+                  {activeModalSection === 'model' && (
+                    <div>
+                      {/* <h4 className="text-md font-medium mb-4">Model Configuration</h4> */}
+                      <h4 className="text-md font-medium mb-4 mt-4">Models Configuration</h4>
+                      <div className="space-y-4">
+                        <input
+                          type="text"
+                          value={newModel}
+                          onChange={(e) => setNewModel(e.target.value)}
+                          placeholder="e.g., Llama-3.1-8B"
+                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                        />
+                        <div>
+                          <button
+                            onClick={addModel}
+                            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg"
+                          >
+                            Add Model
+                          </button>
+                        </div>
+
+                        {/* Model list */}
+                        <div
+                          className="space-y-2 overflow-y-auto"
+                          style={{ maxHeight: models.length > 2 ? '200px' : 'auto' }}
+                        >
+                          <div className="my-4 border-t border-gray-700" />
+
+                          <h4 className="text-md font-medium mb-4 mt-4">Models</h4>
+                          {models.length === 0 ? (
+                            <p className="text-sm text-gray-400 italic">No models configurated.</p>
+                          ) : (
+                            models.map((model, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                              >
+                                <span>{model}</span>
+                                <button
+                                  onClick={() => removeModel(model)}
+                                  className="hover:text-red-500 transition-colors"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            )))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModalSection === 'endpoint' && (
+                    <div>
+                      <h4 className="text-md font-medium mb-4">Endpoint Configuration</h4>
+                      <div className="space-y-4">
+                        <input
+                          type="text"
+                          value={newEndpoint}
+                          onChange={(e) => setNewEndpoint(e.target.value)}
+                          placeholder="http://localhost:11434"
+                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                        />
+                        <div>
+                          <button
+                            onClick={addEndpoint}
+                            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg"
+                          >
+                            Add Endpoint
+                          </button>
+                        </div>
+
+                        {/* Endpoint list */}
+                        <div
+                          className="space-y-2 overflow-y-auto"
+                          style={{ maxHeight: endpoints.length > 2 ? '200px' : 'auto' }}
+                        >
+                          <div className="my-4 border-t border-gray-700" />
+
+                          <h4 className="text-md font-medium mb-4 mt-4">Endpoints</h4>
+                          {endpoints.length === 0 ? (
+                            <p className="text-sm text-gray-400 italic">No endpoints configurated.</p>
+                          ) : (
+                            endpoints.map((endpoint, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                              >
+                                <span>{endpoint}</span>
+                                <button
+                                  onClick={() => removeEndpoint(endpoint)}
+                                  className="hover:text-red-500 transition-colors"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            )))}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
