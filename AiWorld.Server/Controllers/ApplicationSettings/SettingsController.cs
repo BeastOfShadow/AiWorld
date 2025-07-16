@@ -41,12 +41,14 @@ public class SettingsController : ControllerBase
     {
         try
         {
-            var setting = await _context.Settings.FirstOrDefaultAsync();
+            var settings = await _context.Settings
+                .Include(s => s.Endpoint)
+                .FirstOrDefaultAsync();
 
-            if (setting == null || string.IsNullOrEmpty(setting.Endpoint))
+            if (settings?.Endpoint == null || string.IsNullOrEmpty(settings.Endpoint.Url))
                 return NotFound("Endpoint non configurato.");
 
-            return Ok(setting.Endpoint);
+            return Ok(settings.Endpoint.Url);
         }
         catch (Exception ex)
         {
@@ -60,12 +62,14 @@ public class SettingsController : ControllerBase
     {
         try
         {
-            var setting = await _context.Settings.FirstOrDefaultAsync();
+            var settings = await _context.Settings
+                .Include(s => s.Model)
+                .FirstOrDefaultAsync();
 
-            if (setting == null || string.IsNullOrEmpty(setting.ModelName))
+            if (settings?.Model == null || string.IsNullOrEmpty(settings.Model.ModelName))
                 return NotFound("Modello non configurato.");
 
-            return Ok(setting.ModelName);
+            return Ok(settings.Model.ModelName);
         }
         catch (Exception ex)
         {

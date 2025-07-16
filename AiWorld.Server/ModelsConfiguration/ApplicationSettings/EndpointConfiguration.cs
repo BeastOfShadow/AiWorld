@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AiWorld.Server.Models.ApplicationSettings;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Endpoint = AiWorld.Server.Models.ApplicationSettings.Endpoint;
 
@@ -17,5 +18,9 @@ public class EndpointConfiguration : IEntityTypeConfiguration<Endpoint>
 
         builder.Property(x => x.CreatedAt)
             .IsRequired();
+
+        builder.HasOne(m => m.Settings)
+            .WithOne(s => s.Endpoint)
+            .HasForeignKey<Settings>(s => s.EndpointId);
     }
 }

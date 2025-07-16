@@ -3,6 +3,7 @@ using System;
 using AiWorld.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AiWorld.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250716102828_ModelTable")]
+    partial class ModelTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.7");
@@ -44,7 +47,7 @@ namespace AiWorld.Server.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ModelName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -62,19 +65,15 @@ namespace AiWorld.Server.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("EndpointId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("ModelId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("ModelName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EndpointId")
-                        .IsUnique();
-
-                    b.HasIndex("ModelId")
-                        .IsUnique();
 
                     b.ToTable("Settings");
                 });
@@ -334,25 +333,6 @@ namespace AiWorld.Server.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("AiWorld.Server.Models.ApplicationSettings.Settings", b =>
-                {
-                    b.HasOne("AiWorld.Server.Models.ApplicationSettings.Endpoint", "Endpoint")
-                        .WithOne("Settings")
-                        .HasForeignKey("AiWorld.Server.Models.ApplicationSettings.Settings", "EndpointId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AiWorld.Server.Models.ApplicationSettings.Model", "Model")
-                        .WithOne("Settings")
-                        .HasForeignKey("AiWorld.Server.Models.ApplicationSettings.Settings", "ModelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Endpoint");
-
-                    b.Navigation("Model");
-                });
-
             modelBuilder.Entity("AiWorld.Server.Models.Chats.Message", b =>
                 {
                     b.HasOne("AiWorld.Server.Models.Chats.Chat", "Chat")
@@ -412,18 +392,6 @@ namespace AiWorld.Server.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AiWorld.Server.Models.ApplicationSettings.Endpoint", b =>
-                {
-                    b.Navigation("Settings")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AiWorld.Server.Models.ApplicationSettings.Model", b =>
-                {
-                    b.Navigation("Settings")
                         .IsRequired();
                 });
 

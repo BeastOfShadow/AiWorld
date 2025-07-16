@@ -11,11 +11,17 @@ public class SettingsConfiguration : IEntityTypeConfiguration<Settings>
 
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Endpoint)
-            .IsRequired();
+        builder.Property(x => x.EndpointId);
 
-        builder.Property(x => x.ModelName)
-                .IsRequired();
+        builder.Property(x => x.ModelId);
+
+        builder.HasOne(s => s.Model)
+            .WithOne(m => m.Settings)
+            .HasForeignKey<Settings>(s => s.ModelId);
+
+         builder.HasOne(s => s.Endpoint)
+            .WithOne(m => m.Settings)
+            .HasForeignKey<Settings>(s => s.EndpointId);
 
         builder.Property(x => x.CreatedAt)
                 .IsRequired();

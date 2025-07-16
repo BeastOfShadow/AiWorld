@@ -34,9 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ModelsConfiguration/" />
     <Folder Include="ModelsConfiguration/Chats/" />
-    <Folder Include="ModelsConfiguration/ApplicationSettings/" />
     <Folder Include="Requests/" />
   </ItemGroup>
 
