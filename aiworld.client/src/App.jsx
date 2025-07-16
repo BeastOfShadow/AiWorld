@@ -77,7 +77,6 @@ const App = () => {
     setInputValue("");
     setIsLoading(true);
 
-    // Simula risposta AI con streaming
     setTimeout(() => {
       const aiMessage = {
         id: Date.now() + 1,
@@ -122,7 +121,7 @@ const App = () => {
   };
 
   const deleteChat = async (chatId) => {
-    if (chats.length === 1) return;
+    // if (chats.length === 1) return;
 
     try {
       const response = await fetch(`/api/Chat/DeleteChat/${chatId}`, {
@@ -172,9 +171,9 @@ const App = () => {
     const now = new Date();
     const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
 
-    if (diffInHours < 1) return "Adesso";
-    if (diffInHours < 24) return `${diffInHours}h fa`;
-    if (diffInHours < 48) return "Ieri";
+    if (diffInHours < 1) return "Now";
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInHours < 48) return "Yesterday";
     return date.toLocaleDateString("it-IT", {
       day: "2-digit",
       month: "2-digit",
@@ -457,6 +456,7 @@ const App = () => {
                           </button>
                         </div>
                       </div>
+                      <h4 className="text-md font-medium mb-4 mt-4">CRUD Model Name</h4>
                     </div>
                   )}
                 </div>
