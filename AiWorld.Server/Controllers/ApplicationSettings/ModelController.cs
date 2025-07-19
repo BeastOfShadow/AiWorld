@@ -21,6 +21,27 @@ public class ModelController : ControllerBase
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
+    [HttpPost("CreateModel")]
+    public async Task<ActionResult<Model>> CreateModel([FromBody] Model model)
+    {
+        _logger.LogInformation("Ricevuto modello: {ModelName}", model.ModelName);
+        _context.Models.Add(model);
+        await _context.SaveChangesAsync();
+        return CreatedAtAction(nameof(GetModels), new { id = model.Id }, model);
+    }
+
+    [HttpDelete("DeleteModel/{id}")]
+    public async Task<ActionResult<Model>> DeleteModel(int id)
+    {
+        var model = await _context.Models.FindAsync(id);
+        if (model == null) return NotFound();
+
+        _context.Models.Remove(model);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     [HttpGet("GetModels")]
     public async Task<ActionResult<IEnumerable<Model>>> GetModels()
     {

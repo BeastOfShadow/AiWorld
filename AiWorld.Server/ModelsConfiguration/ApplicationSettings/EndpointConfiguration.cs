@@ -1,4 +1,4 @@
-﻿using AiWorld.Server.Models.ApplicationSettings;
+using AiWorld.Server.Models.ApplicationSettings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Endpoint = AiWorld.Server.Models.ApplicationSettings.Endpoint;

@@ -21,6 +21,7 @@ public class ModelConfiguration : IEntityTypeConfiguration<Model>
 
         builder.HasOne(m => m.Settings)
             .WithOne(s => s.Model)
-            .HasForeignKey<Settings>(s => s.ModelId);
+            .HasForeignKey<Settings>(s => s.ModelId)
+            .IsRequired(false);
     }
 }
