@@ -1,4 +1,6 @@
-﻿namespace AiWorld.Server.Models.ApplicationSettings;
+﻿using System.Text.Json.Serialization;
+
+namespace AiWorld.Server.Models.ApplicationSettings;
 
 public class Endpoint
 {
@@ -6,5 +8,6 @@ public class Endpoint
     public string Url { get; set; }
     public DateTime CreatedAt { get; set; }
 
-    public Settings Settings { get; set; }
+    [JsonIgnore]
+    public Settings? Settings { get; set; }
 }
