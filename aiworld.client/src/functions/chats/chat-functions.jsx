@@ -31,3 +31,16 @@ export async function createChat(chatData) {
 
     return await response.json();
 }
+
+export async function deleteChat(chatId) {
+    const response = await fetch(`/api/Chat/DeleteChat/${chatId}`, {
+        method: 'DELETE'
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Errore ${response.status}: ${response.statusText}`);
+    }
+
+    return await response.json();
+}

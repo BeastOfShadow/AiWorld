@@ -15,3 +15,33 @@ export async function getModels() {
         return [];
     }
 }
+
+export async function createModel(modelData) {
+    const response = await fetch('/api/Model/CreateModel', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(modelData)
+    });
+
+    if (!response.ok) {
+        throw new Error(`Errore ${response.status}: ${response.statusText}`);
+    }
+
+    return await response.json();
+}
+
+export async function deleteModel(id) {
+    console.log(id);
+    const response = await fetch(`/api/Model/DeleteModel/${id}`, {
+        method: 'DELETE'
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Errore ${response.status}: ${response.statusText}`);
+    }
+
+    return await response.json();
+}
