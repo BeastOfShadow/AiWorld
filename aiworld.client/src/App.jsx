@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { X, Star, Settings, User, Sun, Moon, ChevronRight, CpuIcon, Link, Brain } from "lucide-react";
+import { X, Star, Settings, User, Sun, Moon, ChevronRight, CpuIcon, Link, Brain, AwardIcon } from "lucide-react";
 
 import Sidebar from "./components/sidebar/sidebar.jsx";
 import ChatArea from "./components/main-chat-area/chat-area.jsx";
-import { getChats, createChat } from "./functions/chats/chat-functions.jsx";
-import { getModels } from "./functions/application-settings/models-function.jsx"
+import { getChats, createChat, deleteChat } from "./functions/chats/chat-functions.jsx";
+import { getModels, createModel, deleteModel } from "./functions/application-settings/models-function.jsx"
 
 const App = () => {
   const [chats, setChats] = useState([]);
@@ -15,15 +15,30 @@ const App = () => {
   const [models, setModels] = useState([]);
   const [newModel, setNewModel] = useState("");
 
-  const addModel = () => {
-    if (newModel.trim() && !models.includes(newModel.trim())) {
-      setModels([...models, newModel.trim()]);
-      setNewModel("");
+  const addModel = async () => {
+    if (newModel.trim() && !models.some(m => m.modelName === newModel.trim())) {
+      const modelToAdd = {
+        modelName: newModel,
+        createdAt: new Date().toISOString(),
+      };
+
+      try {
+        const savedModel = await createModel(modelToAdd);
+        setModels([...models, savedModel]);
+        setNewModel("");
+      } catch (error) {
+        console.error("Errore nella creazione del modello:", error);
+      }
     }
   };
 
-  const removeModel = (modelToRemove) => {
-    setModels(models.filter(m => m !== modelToRemove));
+  const removeModel = async (modelToRemove) => {
+    try {
+      await deleteModel(modelToRemove.id);
+      setModels(prevModels => prevModels.filter(m => m.id !== modelToRemove.id));
+    } catch (error) {
+      console.error("Errore nella cancellazione del modello:", error);
+    }
   };
 
   const [endpoints, setEndpoints] = useState([]);
@@ -146,6 +161,7 @@ const App = () => {
       preview: "New conversation...",
       modelUsed: "Llama-3.1-8B",
     };
+
     try {
       const savedChat = await createChat(newChat);
       setChats((prev) => [savedChat, ...prev]);
@@ -155,17 +171,11 @@ const App = () => {
     }
   };
 
-  const deleteChat = async (chatId) => {
-    // if (chats.length === 1) return;
+  const deleteChatById = async (chatId) => {
+    if (chats.length <= 0) return;
 
     try {
-      const response = await fetch(`/api/Chat/DeleteChat/${chatId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error(`Errore ${response.status}: ${response.statusText}`);
-      }
+      await deleteChat(chatId);
 
       setChats((prev) => prev.filter((chat) => chat.id !== chatId));
       setMessages((prev) => prev.filter((msg) => msg.chatId !== chatId));
@@ -311,7 +321,7 @@ const App = () => {
           setEditingTitle={setEditingTitle}
           saveEditingChat={saveEditingChat}
           startEditingChat={startEditingChat}
-          deleteChat={deleteChat}
+          deleteChat={deleteChatById}
           formatDate={formatDate}
           isDarkMode={isDarkMode}
           setIsDarkMode={setIsDarkMode}
@@ -541,30 +551,31 @@ const App = () => {
                         </div>
 
                         {/* Model list */}
-                        <div
-                          className="space-y-2 overflow-y-auto"
-                          style={{ maxHeight: models.length > 2 ? '200px' : 'auto' }}
-                        >
+                        <div>
                           <div className="my-4 border-t border-gray-700" />
-
                           <h4 className="text-md font-medium mb-4 mt-4">Models</h4>
-                          {models.length === 0 ? (
-                            <p className="text-sm text-gray-400 italic">No models configurated.</p>
-                          ) : (
-                            models.map((model, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
-                              >
-                                <span>{model}</span>
-                                <button
-                                  onClick={() => removeModel(model)}
-                                  className="hover:text-red-500 transition-colors"
+                          <div
+                            className="space-y-2 overflow-y-auto"
+                            style={{ maxHeight: models.length > 2 ? '200px' : 'auto' }}
+                          >
+                            {models.length === 0 ? (
+                              <p className="text-sm text-gray-400 italic">No models configurated.</p>
+                            ) : (
+                              models.map((model, index) => (
+                                <div
+                                  key={index}
+                                  className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
                                 >
-                                  <X className="w-4 h-4" />
-                                </button>
-                              </div>
-                            )))}
+                                  <span>{model.modelName}</span>
+                                  <button
+                                    onClick={() => removeModel(model)}
+                                    className="hover:text-red-500 transition-colors"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              )))}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -591,30 +602,31 @@ const App = () => {
                         </div>
 
                         {/* Endpoint list */}
-                        <div
-                          className="space-y-2 overflow-y-auto"
-                          style={{ maxHeight: endpoints.length > 2 ? '200px' : 'auto' }}
-                        >
+                        <div>
                           <div className="my-4 border-t border-gray-700" />
-
                           <h4 className="text-md font-medium mb-4 mt-4">Endpoints</h4>
-                          {endpoints.length === 0 ? (
-                            <p className="text-sm text-gray-400 italic">No endpoints configurated.</p>
-                          ) : (
-                            endpoints.map((endpoint, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
-                              >
-                                <span>{endpoint}</span>
-                                <button
-                                  onClick={() => removeEndpoint(endpoint)}
-                                  className="hover:text-red-500 transition-colors"
+                          <div
+                            className="space-y-2 overflow-y-auto"
+                            style={{ maxHeight: endpoints.length > 2 ? '200px' : 'auto' }}
+                          >
+                            {endpoints.length === 0 ? (
+                              <p className="text-sm text-gray-400 italic">No endpoints configurated.</p>
+                            ) : (
+                              endpoints.map((endpoint, index) => (
+                                <div
+                                  key={index}
+                                  className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
                                 >
-                                  <X className="w-4 h-4" />
-                                </button>
-                              </div>
-                            )))}
+                                  <span>{endpoint}</span>
+                                  <button
+                                    onClick={() => removeEndpoint(endpoint)}
+                                    className="hover:text-red-500 transition-colors"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              )))}
+                          </div>
                         </div>
                       </div>
                     </div>
