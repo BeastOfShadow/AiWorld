@@ -3,6 +3,7 @@ using AiWorld.Server.Data;
 using AiWorld.Server.Models.ApplicationSettings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Endpoint = AiWorld.Server.Models.ApplicationSettings.Endpoint;
 
 namespace AiWorld.Server.Controllers.ApplicationSettings;
 
@@ -76,5 +77,28 @@ public class SettingsController : ControllerBase
             _logger.LogError(ex, "Errore durante il recupero del modello");
             return StatusCode(500, "Errore interno del server");
         }
+    }
+
+    [HttpPost("CreateModel")]
+    public async Task<ActionResult<Model>> CreateModel([FromBody] Model model)
+    {
+        ArgumentNullException.ThrowIfNull(model, nameof(model));
+        model.CreatedAt = DateTime.UtcNow;
+        await _context.Models.AddAsync(model);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(CreateModel), model);
+
+    }
+
+    [HttpPost("CreateEndpoint")]
+    public async Task<ActionResult<Endpoint>> CreateEndpoint([FromBody] Endpoint endpoint)
+    {
+        ArgumentNullException.ThrowIfNull(endpoint, nameof(endpoint));
+        endpoint.CreatedAt = DateTime.UtcNow;
+        await _context.Endpoints.AddAsync(endpoint);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(CreateEndpoint), endpoint);
     }
 }
