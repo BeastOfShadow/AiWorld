@@ -11,5 +11,5 @@ public class Chat
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime LastAccessed { get; set; } = DateTime.UtcNow;
 
-    public IEnumerable<Message> Messages { get; set; }
+    public IEnumerable<Message>? Messages { get; set; }
 }
