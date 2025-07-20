@@ -7,7 +7,7 @@ import { getSettings, updateSettings } from "./functions/application-settings/se
 import { getChats, createChat, deleteChat } from "./functions/chats/chat-functions.jsx";
 import { getModels, createModel, deleteModel } from "./functions/application-settings/models-function.jsx"
 import { getEndpoints, createEndpoint, deleteEndpoint } from "./functions/application-settings/endpoints-functions.jsx";
-import { saveMessage } from "./functions/chats/message-functions.jsx";
+import { saveMessage, getMessagesByChatId } from "./functions/chats/message-functions.jsx";
 
 const App = () => {
   const [chats, setChats] = useState([]);
@@ -19,6 +19,8 @@ const App = () => {
 
   const [selectedModelId, setSelectedModelId] = useState(null);
   const [selectedEndpointId, setSelectedEndpointId] = useState(null);
+  const [originalModelId, setOriginalModelId] = useState(null);
+  const [originalEndpointId, setOriginalEndpointId] = useState(null);
 
   const [activeModalSection, setActiveModalSection] = useState('general');
 
@@ -80,6 +82,12 @@ const App = () => {
     }
   };
 
+  const hasChanges = () => {
+    const modelChanged = selectedModelId !== originalModelId;
+    const endpointChanged = selectedEndpointId !== originalEndpointId;
+    return modelChanged || endpointChanged;
+  };
+
   useEffect(() => {
     const fetchSettings = async () => {
       const settingsParameters = await getSettings();
@@ -87,6 +95,9 @@ const App = () => {
         url: settingsParameters[0]?.endpoint?.url || null,
         modelName: settingsParameters[0]?.model?.modelName || null,
       });
+
+      setSelectedEndpointId(settingsParameters[0]?.endpoint?.id || null);
+      setSelectedModelId(settingsParameters[0]?.model?.id || null);
     };
 
     const fetchModels = async () => {
@@ -127,6 +138,19 @@ const App = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (currentChatId) {
+        const messagesData = await getMessagesByChatId(currentChatId);
+        setMessages(messagesData);
+      } else {
+        setMessages([]);
+      }
+    };
+
+    fetchMessages();
+  }, [currentChatId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -194,10 +218,8 @@ const App = () => {
         timestamp: new Date().toISOString(),
       };
 
-      // Aggiungi il messaggio vuoto all'array
       setMessages(prev => [...prev, aiMessage]);
 
-      // Processa lo stream
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let fullResponse = "";
@@ -206,26 +228,14 @@ const App = () => {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n').filter(line => line.trim());
+        const tokenChunk = decoder.decode(value);
+        fullResponse += tokenChunk;
 
-        for (const line of lines) {
-          try {
-            const parsed = JSON.parse(line);
-            if (parsed.message?.prompt) {
-              fullResponse += parsed.message.prompt;
-
-              // Aggiorna progressivamente il messaggio
-              setMessages(prev => prev.map(msg =>
-                msg.timestamp === aiMessage.timestamp
-                  ? { ...msg, prompt: fullResponse }
-                  : msg
-              ));
-            }
-          } catch (e) {
-            console.error("Errore parsing chunk:", e);
-          }
-        }
+        setMessages(prev => prev.map(msg =>
+          msg.timestamp === aiMessage.timestamp
+            ? { ...msg, prompt: fullResponse }
+            : msg
+        ));
       }
 
       // Salva la risposta completa
@@ -275,6 +285,7 @@ const App = () => {
       const savedChat = await createChat(newChat);
       setChats((prev) => [savedChat, ...prev]);
       setCurrentChatId(savedChat.id);
+      setMessages([]);
     } catch (error) {
       console.error("Errore nella creazione della chat:", error);
     }
@@ -436,6 +447,8 @@ const App = () => {
           setIsDarkMode={setIsDarkMode}
           showSettings={showSettings}
           setShowSettings={setShowSettings}
+          modelName={appSettings.modelName || "None"}
+          endpoint={appSettings.url || "None"}
         />
 
         {/* Main Chat Area */}
@@ -668,14 +681,18 @@ const App = () => {
                                   url: selectedEndpointId ? endpoints.find(e => e.id === selectedEndpointId)?.url || prev.url : prev.url,
                                   modelName: selectedModelId ? models.find(m => m.id === selectedModelId)?.modelName || prev.modelName : prev.modelName
                                 }));
-                                
+
                                 setSelectedEndpointId(newEndpoint?.id || null);
                                 setSelectedModelId(newModel?.id || null);
                               } catch (error) {
                                 console.error("Failed to save settings:", error);
                               }
                             }}
-                            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg"
+                            disabled={!hasChanges()}
+                            className={`px-4 py-2 rounded-lg ${hasChanges()
+                              ? "bg-purple-600 hover:bg-purple-700"
+                              : "bg-gray-700 cursor-not-allowed"
+                              }`}
                           >
                             Save Configuration
                           </button>

@@ -25,7 +25,9 @@ const Sidebar = ({
   isDarkMode,
   setIsDarkMode,
   showSettings,
-  setShowSettings
+  setShowSettings,
+  modelName,
+  endpoint
 }) => {
   return (
     <div
@@ -38,6 +40,8 @@ const Sidebar = ({
         <SidebarHeader
           createNewChat={createNewChat}
           setSidebarOpen={setSidebarOpen}
+          modelName={modelName}
+          endpoint={endpoint}
         />
 
         {/* Search */}

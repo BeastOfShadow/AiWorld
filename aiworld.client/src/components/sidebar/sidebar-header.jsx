@@ -3,32 +3,7 @@ import { Plus, X, Star, } from "lucide-react";
 
 import { getSettings, getModelName, } from "../../functions/application-settings/settings-functions"; // Assicurati di avere questa funzione per ottenere il nome del modello
 
-const SidebarHeader = ({ createNewChat, setSidebarOpen }) => {
-  const [modelName, setModelName] = useState();
-  const [endpoint, setEndpoint] = useState();
-
-  const fetchSettings = async () => {
-    try {
-      const data = await getSettings();
-
-      if (data[0]?.model.modelName != null) {
-        setModelName(data[0]?.model.modelName);
-      }
-      console.log("URL: ", data[0].endpoint.url);
-      if (data[0]?.endpoint.url != null) {
-        setEndpoint(data[0]?.endpoint.url);
-      }
-
-    } catch (error) {
-      console.error("Errore nella richiesta dei settings:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchSettings();
-    console.log("Model name: ", modelName);
-  }, []);
-
+const SidebarHeader = ({ createNewChat, setSidebarOpen, modelName, endpoint }) => {
   return (
     <div className="p-4 border-b border-gray-800">
       <div className="flex items-center justify-between mb-4">
