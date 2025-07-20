@@ -33,7 +33,7 @@ public class SettingsController : ControllerBase
     {
         try
         {
-            return Ok(await _context.Settings.FirstOrDefaultAsync());
+            return Ok(await _context.Settings.Include(r => r.Model).Include(r => r.Endpoint).ToListAsync());
         }
         catch (Exception ex)
         {
