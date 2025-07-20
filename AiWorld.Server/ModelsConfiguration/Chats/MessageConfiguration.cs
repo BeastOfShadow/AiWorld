@@ -16,7 +16,7 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.Property(x => x.Prompt)
             .IsRequired();
 
-        builder.Property(x => x.Embedding);
+        builder.Property(x => x.Embedding).IsRequired(false);
 
         builder.Property(x => x.Sender)
             .IsRequired();

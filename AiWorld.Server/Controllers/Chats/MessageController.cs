@@ -23,7 +23,7 @@ public class MessageController : ControllerBase
     [HttpGet("GetMessages/{chatId}")]
     public async Task<ActionResult<IEnumerable<Message>>> GetMessages(int chatId)
     {
-       return Ok(await _context.Messages.Where(m => m.ChatId == chatId).ToListAsync());
+        return Ok(await _context.Messages.Where(m => m.ChatId == chatId).ToListAsync());
     }
 
     [HttpPost("SaveMessage")]

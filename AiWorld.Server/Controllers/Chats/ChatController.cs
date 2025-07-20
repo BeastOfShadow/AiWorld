@@ -26,7 +26,7 @@ public class ChatController : ControllerBase
     {
         try
         {
-            return Ok(await _context.Chats.ToListAsync());
+            return Ok(await _context.Chats.OrderBy(c => c.LastAccessed).ToListAsync());
         }
         catch (Exception ex)
         {
@@ -38,6 +38,7 @@ public class ChatController : ControllerBase
     [HttpPost("CreateChat")]
     public async Task<ActionResult<Chat>> CreateChat([FromBody] Chat chat)
     {
+        _logger.LogInformation("OGGETTO CHAT: " + chat);
         _context.Chats.Add(chat);
         await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetChats), new { id = chat.Id }, chat);

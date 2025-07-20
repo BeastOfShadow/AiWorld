@@ -38,6 +38,27 @@ IMapper mapper = mapperConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);
 #endregion
 
+builder.Services.AddEndpointsApiExplorer();  // Necessario per .NET 7+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "AI World API",
+        Version = "v1",
+        Description = "API documentation for AiWorld"
+    });
+
+    c.EnableAnnotations();
+    
+    // Aggiungi i commenti XML (opzionale ma consigliato)
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+    }
+});
+
 var app = builder.Build();
 
 app.UseDefaultFiles();
@@ -54,6 +75,12 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "AiWorld API v1");
+});
 
 app.MapFallbackToFile("/index.html");
 

@@ -68,6 +68,14 @@ const SidebarHeader = ({ createNewChat, setSidebarOpen }) => {
         {modelName && !endpoint && "Please configure an endpoint in settings to start chatting"}
         {!modelName && endpoint && "Please configure a model in settings to start chatting"}
       </p>
+      <div className="mb-3 mt-5 text-xs space-y-1">
+        <p className="text-gray-400 truncate">
+          Model: <span className="text-blue-300">{modelName || "Not configured"}</span>
+        </p>
+        <p className="text-gray-400 truncate">
+          Endpoint: <span className="text-purple-300">{endpoint || "Not configured"}</span>
+        </p>
+      </div>
     </div>
   );
 };

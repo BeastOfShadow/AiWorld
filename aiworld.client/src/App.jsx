@@ -7,6 +7,7 @@ import { getSettings, updateSettings } from "./functions/application-settings/se
 import { getChats, createChat, deleteChat } from "./functions/chats/chat-functions.jsx";
 import { getModels, createModel, deleteModel } from "./functions/application-settings/models-function.jsx"
 import { getEndpoints, createEndpoint, deleteEndpoint } from "./functions/application-settings/endpoints-functions.jsx";
+import { saveMessage } from "./functions/chats/message-functions.jsx";
 
 const App = () => {
   const [chats, setChats] = useState([]);
@@ -109,18 +110,9 @@ const App = () => {
     loadChats();
   }, []);
 
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      chatId: 1,
-      role: "assistant",
-      content:
-        "Ciao! Benvenuto in **AIWorld** 🌌\n\nSono il tuo assistente AI personale. Posso aiutarti con:\n- Programmazione e sviluppo\n- Analisi dati e ricerca\n- Scrittura creativa\n- Risoluzione problemi\n\nCosa posso fare per te oggi?",
-      timestamp: new Date().toISOString(),
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
 
-  const [currentChatId, setCurrentChatId] = useState(1);
+  const [currentChatId, setCurrentChatId] = useState(null);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -152,44 +144,127 @@ const App = () => {
   );
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return;
+    if (!inputValue.trim() || isLoading || !currentChatId) return;
+
+    if (!appSettings.url || !appSettings.modelName) {
+      setIsLoading(false);
+      setMessages(prev => [...prev, {
+        chatId: currentChatId,
+        sender: 1,
+        prompt: "❌ Errore: Configura prima un endpoint e un modello nelle impostazioni!",
+        timestamp: new Date().toISOString()
+      }]);
+      setShowSettings(true); // Apri automaticamente le impostazioni
+      return;
+    }
 
     const userMessage = {
-      id: Date.now(),
       chatId: currentChatId,
-      role: "user",
-      content: inputValue,
+      sender: 0,
+      prompt: inputValue,
       timestamp: new Date().toISOString(),
     };
+
+    await saveMessage(userMessage);
 
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${appSettings.url}/api/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: appSettings.modelName,
+          messages: [
+            ...currentMessages.map(msg => ({
+              sender: msg.sender,
+              prompt: msg.prompt
+            })),
+            { sender: 0, prompt: inputValue }
+          ],
+          stream: true
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const aiMessage = {
-        id: Date.now() + 1,
         chatId: currentChatId,
-        role: "assistant",
-        content: `Grazie per la tua domanda! Questa è una risposta simulata dal sistema AI di AIWorld. \n\nIn una implementazione reale, qui vedrai le risposte dal modello AI locale che hai configurato (Ollama, Llama.cpp, ecc.).\n\n**Funzionalità implementate:**\n- Chat in tempo reale\n- Gestione sidebar\n- Ricerca nello storico\n- Interfaccia responsive\n- Tema spaziale\n\n*Connessione al backend in arrivo...*`,
+        sender: 1,
+        prompt: "",
         timestamp: new Date().toISOString(),
       };
 
-      setMessages((prev) => [...prev, aiMessage]);
-      setIsLoading(false);
+      // Aggiungi il messaggio vuoto all'array
+      setMessages(prev => [...prev, aiMessage]);
 
-      setChats((prev) =>
-        prev.map((chat) =>
-          chat.id === currentChatId
-            ? {
-              ...chat,
-              preview: userMessage.content.substring(0, 50) + "...",
-              lastAccessed: new Date().toISOString(),
+      // Processa lo stream
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n').filter(line => line.trim());
+
+        for (const line of lines) {
+          try {
+            const parsed = JSON.parse(line);
+            if (parsed.message?.prompt) {
+              fullResponse += parsed.message.prompt;
+
+              // Aggiorna progressivamente il messaggio
+              setMessages(prev => prev.map(msg =>
+                msg.timestamp === aiMessage.timestamp
+                  ? { ...msg, prompt: fullResponse }
+                  : msg
+              ));
             }
-            : chat
-        )
-      );
-    }, 1500);
+          } catch (e) {
+            console.error("Errore parsing chunk:", e);
+          }
+        }
+      }
+
+      // Salva la risposta completa
+      await saveMessage({
+        ...aiMessage,
+        prompt: fullResponse
+      });
+
+      // Aggiorna l'anteprima della chat
+      setChats(prev => prev.map(chat =>
+        chat.id === currentChatId
+          ? {
+            ...chat,
+            preview: inputValue.substring(0, 50) + "...",
+            lastAccessed: new Date().toISOString()
+          }
+          : chat
+      ));
+
+    } catch (error) {
+      console.error("Errore nell'invio del messaggio:", error);
+
+      // Messaggio di errore
+      const errorMessage = {
+        chatId: currentChatId,
+        sender: 1,
+        prompt: `Errore nella comunicazione con Ollama: ${error.message}`,
+        timestamp: new Date().toISOString(),
+      };
+
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const createNewChat = async () => {
@@ -265,7 +340,7 @@ const App = () => {
   };
 
   const renderMessage = (message) => {
-    const isUser = message.role === "user";
+    const isUser = message.sender === 0;
     return (
       <div
         key={message.id}
@@ -296,7 +371,7 @@ const App = () => {
                 }`}
             >
               <div className="prose prose-invert max-w-none">
-                {message.content.split("\n").map((line, idx) => {
+                {message.prompt.split("\n").map((line, idx) => {
                   if (line.startsWith("**") && line.endsWith("**")) {
                     return (
                       <div key={idx} className="font-bold text-blue-300 mb-2">

@@ -5,7 +5,7 @@ import {
   Calendar,
 } from "lucide-react";
 
-const SidebarChatList = ({ 
+const SidebarChatList = ({
   filteredChats,
   currentChatId,
   setCurrentChatId,
@@ -16,10 +16,14 @@ const SidebarChatList = ({
   startEditingChat,
   deleteChat,
   formatDate
- }) => {
+}) => {
+  const sortedChats = [...filteredChats].sort((a, b) => {
+    return new Date(b.lastAccessed) - new Date(a.lastAccessed);
+  });
+
   return (
     <div className="flex-1 overflow-y-auto">
-      {filteredChats.map((chat) => (
+      {sortedChats.map((chat) => (
         <div
           key={chat.id}
           className={`group p-4 cursor-pointer border-b border-gray-800/50 hover:bg-gray-800/50 transition-all ${currentChatId === chat.id
