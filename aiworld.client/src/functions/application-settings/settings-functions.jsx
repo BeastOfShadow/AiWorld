@@ -6,7 +6,7 @@ export async function getSettings() {
             throw new Error(`Errore ${response.status}: ${response.statusText}`);
         }
         
-        return await response.text();
+        return await response.json();
     } catch (error) {
         console.error("Errore nel caricamento dei settings:", error);
         return [];
@@ -25,7 +25,6 @@ export async function getModelName() {
         }
         
         const modelName = await response.text();
-        console.log("Model name:", modelName);
         return modelName;
 
     } catch (error) {

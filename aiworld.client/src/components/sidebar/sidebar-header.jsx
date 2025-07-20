@@ -11,11 +11,14 @@ const SidebarHeader = ({ createNewChat, setSidebarOpen }) => {
     try {
       const data = await getSettings();
 
-      if (data?.modelId) {
-        const model = await GetModelName();
-        setModelName(model);
+      if (data[0]?.model.modelName != null) {
+        setModelName(data[0]?.model.modelName);
       }
-      if (data.endpoint != null) setEndpoint(data.endpoint);
+      console.log("URL: ", data[0].endpoint.url);
+      if (data[0]?.endpoint.url != null) {
+        setEndpoint(data[0]?.endpoint.url);
+      }
+
     } catch (error) {
       console.error("Errore nella richiesta dei settings:", error);
     }
@@ -61,9 +64,9 @@ const SidebarHeader = ({ createNewChat, setSidebarOpen }) => {
         New Chat
       </button>
       <p className="text-xs text-red-500 mt-2">
-        {(!modelName && !endpoint) && ("Please provide a model name and a valid endpoint in settings to start chatting.")}
-        {modelName && !endpoint && ("Please provide a model name in settings to start chatting.")}
-        {endpoint && !modelName && ("Please provide a valid enpoint in settings to start chatting.")}
+        {!modelName && !endpoint && "Please configure both a model and an endpoint in settings to start chatting"}
+        {modelName && !endpoint && "Please configure an endpoint in settings to start chatting"}
+        {!modelName && endpoint && "Please configure a model in settings to start chatting"}
       </p>
     </div>
   );

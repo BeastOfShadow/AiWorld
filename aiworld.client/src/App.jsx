@@ -12,12 +12,12 @@ const App = () => {
   const [chats, setChats] = useState([]);
   const [showSettings, setShowSettings] = useState(false);
   const [appSettings, setAppSettings] = useState({
-    endpointId: null,
-    modelId: null
+    url: null,
+    modelName: null
   });
 
   const [selectedModelId, setSelectedModelId] = useState(null);
-  const [selectedEndpointId, setSelectedEndpointId] = useState(null); 
+  const [selectedEndpointId, setSelectedEndpointId] = useState(null);
 
   const [activeModalSection, setActiveModalSection] = useState('general');
 
@@ -82,7 +82,10 @@ const App = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       const settingsParameters = await getSettings();
-      setAppSettings(settingsParameters.endpointId, settingsParameters.modelId);
+      setAppSettings({
+        url: settingsParameters[0]?.endpoint?.url || null,
+        modelName: settingsParameters[0]?.model?.modelName || null,
+      });
     };
 
     const fetchModels = async () => {
@@ -192,13 +195,13 @@ const App = () => {
   const createNewChat = async () => {
     const newChat = {
       title: `New Chat ${chats.length + 1}`,
+      modelUsed: appSettings.modelName,
+      preview: "New conversation...",
       createdAt: new Date().toISOString(),
       lastAccessed: new Date().toISOString(),
-      preview: "New conversation...",
-      modelUsed: "Llama-3.1-8B",
     };
-
     try {
+      console.log("Invio dati:", JSON.stringify(newChat));
       const savedChat = await createChat(newChat);
       setChats((prev) => [savedChat, ...prev]);
       setCurrentChatId(savedChat.id);
@@ -542,7 +545,6 @@ const App = () => {
                               onChange={(e) => setSelectedModelId(parseInt(e.target.value))}
                               value={selectedModelId || ""}
                             >
-                              <option value="">Select a model</option>
                               {models.map((model) => (
                                 <option key={model.id} value={model.id}>
                                   {model.modelName}
@@ -562,7 +564,6 @@ const App = () => {
                               onChange={(e) => setSelectedEndpointId(parseInt(e.target.value))}
                               value={selectedEndpointId || ""}
                             >
-                              <option value="">Select an endpoint</option>
                               {endpoints.map((endpoint) => (
                                 <option key={endpoint.id} value={endpoint.id}>
                                   {endpoint.url}
@@ -596,6 +597,17 @@ const App = () => {
                             Save Configuration
                           </button>
                         </div>
+
+                        <div className="my-4 border-t border-gray-700" />
+                        <h4 className="text-md font-medium mb-4 mt-4">Current Configuration</h4>
+                        <p className="text-sm">
+                          <span className="text-gray-400">Current Model: </span>
+                          {appSettings.modelName || "None"}
+                        </p>
+                        <p className="text-sm">
+                          <span className="text-gray-400">Current Endpoint: </span>
+                          {appSettings.url || "None"}
+                        </p>
                       </div>
                     </div>
                   )}
