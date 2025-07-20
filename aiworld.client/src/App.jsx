@@ -3,12 +3,21 @@ import { X, Star, Settings, User, Sun, Moon, ChevronRight, CpuIcon, Link, Brain,
 
 import Sidebar from "./components/sidebar/sidebar.jsx";
 import ChatArea from "./components/main-chat-area/chat-area.jsx";
+import { getSettings, updateSettings } from "./functions/application-settings/settings-functions.jsx";
 import { getChats, createChat, deleteChat } from "./functions/chats/chat-functions.jsx";
 import { getModels, createModel, deleteModel } from "./functions/application-settings/models-function.jsx"
+import { getEndpoints, createEndpoint, deleteEndpoint } from "./functions/application-settings/endpoints-functions.jsx";
 
 const App = () => {
   const [chats, setChats] = useState([]);
   const [showSettings, setShowSettings] = useState(false);
+  const [appSettings, setAppSettings] = useState({
+    endpointId: null,
+    modelId: null
+  });
+
+  const [selectedModelId, setSelectedModelId] = useState(null);
+  const [selectedEndpointId, setSelectedEndpointId] = useState(null); 
 
   const [activeModalSection, setActiveModalSection] = useState('general');
 
@@ -34,8 +43,8 @@ const App = () => {
 
   const removeModel = async (modelToRemove) => {
     try {
-      await deleteModel(modelToRemove.id);
       setModels(prevModels => prevModels.filter(m => m.id !== modelToRemove.id));
+      await deleteModel(modelToRemove.id);
     } catch (error) {
       console.error("Errore nella cancellazione del modello:", error);
     }
@@ -44,29 +53,56 @@ const App = () => {
   const [endpoints, setEndpoints] = useState([]);
   const [newEndpoint, setNewEndpoint] = useState("");
 
-  const addEndpoint = () => {
-    if (newEndpoint.trim() && !endpoints.includes(newEndpoint.trim())) {
-      setEndpoints([...endpoints, newEndpoint.trim()]);
-      setNewEndpoint("");
+  const addEndpoint = async () => {
+    if (newEndpoint.trim() && !endpoints.some(m => m.url === newEndpoint.trim())) {
+      const endpointToAdd = {
+        url: newEndpoint,
+        createdAt: new Date().toISOString(),
+      };
+
+      try {
+        const savedEndpoint = await createEndpoint(endpointToAdd);
+        setEndpoints([...endpoints, savedEndpoint]);
+        setNewEndpoint("");
+      } catch (error) {
+        console.error("Errore nella creazione dell'endpoint:", error);
+      }
     }
   };
 
-  const removeEndpoint = (modelToRemove) => {
-    setEndpoints(endpoints.filter(m => m !== modelToRemove));
+  const removeEndpoint = async (modelToRemove) => {
+    try {
+      setEndpoints(endpoints.filter(m => m !== modelToRemove));
+      await deleteEndpoint(modelToRemove.id);
+    } catch (error) {
+      console.error("Errore nella cancellazione dell'endpoint:", error);
+    }
   };
 
   useEffect(() => {
+    const fetchSettings = async () => {
+      const settingsParameters = await getSettings();
+      setAppSettings(settingsParameters.endpointId, settingsParameters.modelId);
+    };
+
     const fetchModels = async () => {
       const allModels = await getModels();
       setModels(allModels);
     };
+
+    const fetchEndpoints = async () => {
+      const allEndpoints = await getEndpoints();
+      setEndpoints(allEndpoints);
+    }
 
     const loadChats = async () => {
       const chatsData = await getChats();
       setChats(chatsData);
     };
 
+    fetchSettings();
     fetchModels();
+    fetchEndpoints();
     loadChats();
   }, []);
 
@@ -497,31 +533,66 @@ const App = () => {
                       <h4 className="text-md font-medium mb-4">Connection Configuration</h4>
                       <div className="space-y-4">
                         <div>
-                          {/* <label className="block text-sm text-gray-400 mb-1">Model Selection</label> */}
-                          {/* <select className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white">
-                            <option>Llama-3.1-8B</option>
-                            <option>Mistral-7B</option>
-                            <option>GPT-4</option>
-                          </select> */}
-                          <label className="block text-sm text-gray-400 mb-1">Model Name</label>
-                          <input
-                            type="text"
-                            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
-                            placeholder="Llama-3.1-8B"
-                          />
+                          <label className="block text-sm text-gray-400 mb-1">Model Selection</label>
+                          {models.length === 0 ? (
+                            <p className="text-red-500 text-sm py-2">No models available. Please add models first.</p>
+                          ) : (
+                            <select
+                              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                              onChange={(e) => setSelectedModelId(parseInt(e.target.value))}
+                              value={selectedModelId || ""}
+                            >
+                              <option value="">Select a model</option>
+                              {models.map((model) => (
+                                <option key={model.id} value={model.id}>
+                                  {model.modelName}
+                                </option>
+                              ))}
+                            </select>
+                          )}
                         </div>
 
                         <div>
                           <label className="block text-sm text-gray-400 mb-1">Endpoint API</label>
-                          <input
-                            type="text"
-                            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
-                            placeholder="http://localhost:11434"
-                          />
+                          {endpoints.length === 0 ? (
+                            <p className="text-red-500 text-sm py-2">No endpoints available. Please add endpoints first.</p>
+                          ) : (
+                            <select
+                              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                              onChange={(e) => setSelectedEndpointId(parseInt(e.target.value))}
+                              value={selectedEndpointId || ""}
+                            >
+                              <option value="">Select an endpoint</option>
+                              {endpoints.map((endpoint) => (
+                                <option key={endpoint.id} value={endpoint.id}>
+                                  {endpoint.url}
+                                </option>
+                              ))}
+                            </select>
+                          )}
                         </div>
 
                         <div className="pt-2">
-                          <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg">
+                          <button
+                            onClick={async () => {
+                              console.log("Saving settings with:", {
+                                endpointId: selectedEndpointId,
+                                modelId: selectedModelId
+                              });
+
+                              try {
+                                const updated = await updateSettings({
+                                  endpointId: selectedEndpointId,
+                                  modelId: selectedModelId
+                                });
+                                setAppSettings(updated);
+                                alert("Settings saved successfully!");
+                                // Aggiungi qui un feedback visivo se vuoi
+                              } catch (error) {
+                                console.error("Failed to save settings:", error);
+                              }
+                            }}
+                            className={`${'px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg'}`}>
                             Save Configuration
                           </button>
                         </div>
@@ -617,7 +688,7 @@ const App = () => {
                                   key={index}
                                   className="flex items-center justify-between bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
                                 >
-                                  <span>{endpoint}</span>
+                                  <span>{endpoint.url}</span>
                                   <button
                                     onClick={() => removeEndpoint(endpoint)}
                                     className="hover:text-red-500 transition-colors"

@@ -22,6 +22,12 @@ public class SettingsController : ControllerBase
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
+    public class UpdateSettingsDto
+    {
+        public int? EndpointId { get; set; }
+        public int? ModelId { get; set; }
+    }
+
     [HttpGet("GetSettings")]
     public async Task<ActionResult<Settings>> GetSettings()
     {
@@ -88,7 +94,6 @@ public class SettingsController : ControllerBase
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(CreateModel), model);
-
     }
 
     [HttpPost("CreateEndpoint")]
@@ -100,5 +105,38 @@ public class SettingsController : ControllerBase
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(CreateEndpoint), endpoint);
+    }
+
+    [HttpPut("UpdateSettings")]
+    public async Task<ActionResult<Settings>> UpdateSettings([FromBody] UpdateSettingsDto dto)
+    {
+        _logger.LogDebug("\nInizio UpdateSettings - EndpointId: {EndpointId}, ModelId: {ModelId}\n", 
+        dto.EndpointId, dto.ModelId);
+
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var settings = await _context.Settings.FirstOrDefaultAsync();
+        if (settings == null)
+        {
+            settings = new Settings();
+            _context.Settings.Add(settings);
+        }
+
+        if (dto.EndpointId.HasValue)
+        {
+            var endpointExists = await _context.Endpoints.AnyAsync(e => e.Id == dto.EndpointId);
+            if (!endpointExists) return NotFound("Endpoint non trovato");
+            settings.EndpointId = dto.EndpointId.Value;
+        }
+
+        if (dto.ModelId.HasValue)
+        {
+            var modelExists = await _context.Models.AnyAsync(m => m.Id == dto.ModelId);
+            if (!modelExists) return NotFound("Modello non trovato");
+            settings.ModelId = dto.ModelId.Value;
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok(settings);
     }
 }

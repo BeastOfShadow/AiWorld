@@ -11,9 +11,9 @@ public class SettingsConfiguration : IEntityTypeConfiguration<Settings>
 
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.EndpointId);
+        builder.Property(x => x.EndpointId).IsRequired(false); 
 
-        builder.Property(x => x.ModelId);
+        builder.Property(x => x.ModelId).IsRequired(false); 
 
         builder.HasOne(s => s.Model)
             .WithOne(m => m.Settings)

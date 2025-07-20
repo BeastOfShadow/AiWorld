@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import {Plus,X,Star,} from "lucide-react";
+import { Plus, X, Star, } from "lucide-react";
 
-import { getSettings } from "../../functions/application-settings/settings-functions"; // Assicurati di avere questa funzione per ottenere il nome del modello
+import { getSettings, getModelName, } from "../../functions/application-settings/settings-functions"; // Assicurati di avere questa funzione per ottenere il nome del modello
 
 const SidebarHeader = ({ createNewChat, setSidebarOpen }) => {
   const [modelName, setModelName] = useState();
@@ -9,10 +9,13 @@ const SidebarHeader = ({ createNewChat, setSidebarOpen }) => {
 
   const fetchSettings = async () => {
     try {
-        const data = await getSettings();
-        
-        if(data.modelName != null) setModelName(data.modelName);
-        if(data.endpoint != null) setEndpoint(data.endpoint);
+      const data = await getSettings();
+
+      if (data?.modelId) {
+        const model = await GetModelName();
+        setModelName(model);
+      }
+      if (data.endpoint != null) setEndpoint(data.endpoint);
     } catch (error) {
       console.error("Errore nella richiesta dei settings:", error);
     }
@@ -20,6 +23,7 @@ const SidebarHeader = ({ createNewChat, setSidebarOpen }) => {
 
   useEffect(() => {
     fetchSettings();
+    console.log("Model name: ", modelName);
   }, []);
 
   return (
@@ -48,7 +52,7 @@ const SidebarHeader = ({ createNewChat, setSidebarOpen }) => {
         onClick={createNewChat}
         disabled={!modelName || !endpoint}
         className={`w-full py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-all
-          ${!modelName
+          ${!modelName || !endpoint
             ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
             : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white'}
         `}
@@ -59,7 +63,7 @@ const SidebarHeader = ({ createNewChat, setSidebarOpen }) => {
       <p className="text-xs text-red-500 mt-2">
         {(!modelName && !endpoint) && ("Please provide a model name and a valid endpoint in settings to start chatting.")}
         {modelName && !endpoint && ("Please provide a model name in settings to start chatting.")}
-        {endpoint && !modelName && ( "Please provide a valid enpoint in settings to start chatting.")}
+        {endpoint && !modelName && ("Please provide a valid enpoint in settings to start chatting.")}
       </p>
     </div>
   );

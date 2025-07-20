@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AiWorld.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250715135644_FirstMigration")]
+    [Migration("20250719234304_First-Migration")]
     partial class FirstMigration
     {
         /// <inheritdoc />
@@ -19,6 +19,42 @@ namespace AiWorld.Server.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.7");
+
+            modelBuilder.Entity("AiWorld.Server.Models.ApplicationSettings.Endpoint", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Endpoints");
+                });
+
+            modelBuilder.Entity("AiWorld.Server.Models.ApplicationSettings.Model", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ModelName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Models");
+                });
 
             modelBuilder.Entity("AiWorld.Server.Models.ApplicationSettings.Settings", b =>
                 {
@@ -29,15 +65,19 @@ namespace AiWorld.Server.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Endpoint")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("EndpointId")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("ModelName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("ModelId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EndpointId")
+                        .IsUnique();
+
+                    b.HasIndex("ModelId")
+                        .IsUnique();
 
                     b.ToTable("Settings");
                 });
@@ -48,15 +88,22 @@ namespace AiWorld.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ModelName")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastAccessed")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ModelUsed")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Preview")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -290,10 +337,25 @@ namespace AiWorld.Server.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("AiWorld.Server.Models.ApplicationSettings.Settings", b =>
+                {
+                    b.HasOne("AiWorld.Server.Models.ApplicationSettings.Endpoint", "Endpoint")
+                        .WithOne("Settings")
+                        .HasForeignKey("AiWorld.Server.Models.ApplicationSettings.Settings", "EndpointId");
+
+                    b.HasOne("AiWorld.Server.Models.ApplicationSettings.Model", "Model")
+                        .WithOne("Settings")
+                        .HasForeignKey("AiWorld.Server.Models.ApplicationSettings.Settings", "ModelId");
+
+                    b.Navigation("Endpoint");
+
+                    b.Navigation("Model");
+                });
+
             modelBuilder.Entity("AiWorld.Server.Models.Chats.Message", b =>
                 {
                     b.HasOne("AiWorld.Server.Models.Chats.Chat", "Chat")
-                        .WithMany()
+                        .WithMany("Messages")
                         .HasForeignKey("ChatId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -350,6 +412,21 @@ namespace AiWorld.Server.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("AiWorld.Server.Models.ApplicationSettings.Endpoint", b =>
+                {
+                    b.Navigation("Settings");
+                });
+
+            modelBuilder.Entity("AiWorld.Server.Models.ApplicationSettings.Model", b =>
+                {
+                    b.Navigation("Settings");
+                });
+
+            modelBuilder.Entity("AiWorld.Server.Models.Chats.Chat", b =>
+                {
+                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

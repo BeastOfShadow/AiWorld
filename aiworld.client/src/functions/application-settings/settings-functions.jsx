@@ -13,20 +13,44 @@ export async function getSettings() {
     }
 }
 
-export async function GetModelName() {
+export async function getModelName() {
     try {
         const response = await fetch('/api/Settings/GetModelName');
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                return null;
+            }
+            throw new Error(`Errore ${response.status}: ${response.statusText}`);
+        }
+        
+        const modelName = await response.text();
+        console.log("Model name:", modelName);
+        return modelName;
+
+    } catch (error) {
+        console.error("Errore nel recupero del nome del modello:", error);
+        return null;
+    }
+}
+
+export async function updateSettings(settings) {
+    try {
+        const response = await fetch('/api/Settings/UpdateSettings', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(settings)
+        });
         
         if (!response.ok) {
             throw new Error(`Errore ${response.status}: ${response.statusText}`);
         }
         
-        const data = await response.json();
-        console.log("Response:", data);
-        return data;
-
+        return await response.json();
     } catch (error) {
-        console.error("Errore nel caricamento delle chat:", error);
-        return [];
+        console.error("Errore nell'aggiornamento dei settings:", error);
+        throw error; // Rilancia l'errore per gestirlo nel componente
     }
 }

@@ -1,6 +1,6 @@
-export async function getModels() {
+export async function getEndpoints() {
     try {
-        const response = await fetch('/api/Model/GetModels');
+        const response = await fetch('/api/Endpoint/GetEndpoints');
         
         if (!response.ok) {
             throw new Error(`Errore ${response.status}: ${response.statusText}`);
@@ -11,13 +11,13 @@ export async function getModels() {
         return data;
 
     } catch (error) {
-        console.error("Errore nel caricamento dei modelli:", error);
+        console.error("Errore nel caricamento degli endpoints:", error);
         return [];
     }
 }
 
-export async function createModel(modelData) {
-    const response = await fetch('/api/Model/CreateModel', {
+export async function createEndpoint(modelData) {
+    const response = await fetch('/api/Endpoint/CreateEndpoint', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -32,9 +32,9 @@ export async function createModel(modelData) {
     return await response.json();
 }
 
-export async function deleteModel(id) {
+export async function deleteEndpoint(id) {
     console.log(id);
-    const response = await fetch(`/api/Model/DeleteModel/${id}`, {
+    const response = await fetch(`/api/Endpoint/DeleteEndpoint/${id}`, {
         method: 'DELETE'
     });
 

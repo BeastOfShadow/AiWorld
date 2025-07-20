@@ -62,10 +62,10 @@ namespace AiWorld.Server.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("EndpointId")
+                    b.Property<int?>("EndpointId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ModelId")
+                    b.Property<int?>("ModelId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -338,15 +338,11 @@ namespace AiWorld.Server.Migrations
                 {
                     b.HasOne("AiWorld.Server.Models.ApplicationSettings.Endpoint", "Endpoint")
                         .WithOne("Settings")
-                        .HasForeignKey("AiWorld.Server.Models.ApplicationSettings.Settings", "EndpointId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AiWorld.Server.Models.ApplicationSettings.Settings", "EndpointId");
 
                     b.HasOne("AiWorld.Server.Models.ApplicationSettings.Model", "Model")
                         .WithOne("Settings")
-                        .HasForeignKey("AiWorld.Server.Models.ApplicationSettings.Settings", "ModelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AiWorld.Server.Models.ApplicationSettings.Settings", "ModelId");
 
                     b.Navigation("Endpoint");
 
