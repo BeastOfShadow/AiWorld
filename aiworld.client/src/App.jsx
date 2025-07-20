@@ -172,18 +172,13 @@ const App = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${appSettings.url}/api/generate`, {
+      const response = await fetch(`/api/proxy`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: appSettings.modelName,
-          messages: [
-            ...currentMessages.map(msg => ({
-              sender: msg.sender,
-              prompt: msg.prompt
-            })),
-            { sender: 0, prompt: inputValue }
-          ],
+            url: appSettings.url,
+            modelName: appSettings.modelName,
+            message: userMessage,
           stream: true
         })
       });
