@@ -176,9 +176,9 @@ const App = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            url: appSettings.url,
-            modelName: appSettings.modelName,
-            message: userMessage,
+          url: appSettings.url,
+          modelName: appSettings.modelName,
+          message: userMessage,
           stream: true
         })
       });
@@ -608,13 +608,17 @@ const App = () => {
                         <div>
                           <label className="block text-sm text-gray-400 mb-1">Model Selection</label>
                           {models.length === 0 ? (
-                            <p className="text-red-500 text-sm py-2">No models available. Please add models first.</p>
+                            <p className="text-red-500 text-sm py-2">No models available</p>
                           ) : (
                             <select
                               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
-                              onChange={(e) => setSelectedModelId(parseInt(e.target.value))}
+                              onChange={(e) => {
+                                const selectedId = parseInt(e.target.value);
+                                setSelectedModelId(selectedId);
+                              }}
                               value={selectedModelId || ""}
                             >
+                              <option value="">Select a model</option>
                               {models.map((model) => (
                                 <option key={model.id} value={model.id}>
                                   {model.modelName}
@@ -627,13 +631,17 @@ const App = () => {
                         <div>
                           <label className="block text-sm text-gray-400 mb-1">Endpoint API</label>
                           {endpoints.length === 0 ? (
-                            <p className="text-red-500 text-sm py-2">No endpoints available. Please add endpoints first.</p>
+                            <p className="text-red-500 text-sm py-2">No endpoints available</p>
                           ) : (
                             <select
                               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
-                              onChange={(e) => setSelectedEndpointId(parseInt(e.target.value))}
+                              onChange={(e) => {
+                                const selectedId = parseInt(e.target.value);
+                                setSelectedEndpointId(selectedId);
+                              }}
                               value={selectedEndpointId || ""}
                             >
+                              <option value="">Select an endpoint</option>
                               {endpoints.map((endpoint) => (
                                 <option key={endpoint.id} value={endpoint.id}>
                                   {endpoint.url}
@@ -646,24 +654,29 @@ const App = () => {
                         <div className="pt-2">
                           <button
                             onClick={async () => {
-                              console.log("Saving settings with:", {
-                                endpointId: selectedEndpointId,
-                                modelId: selectedModelId
-                              });
-
                               try {
                                 const updated = await updateSettings({
                                   endpointId: selectedEndpointId,
                                   modelId: selectedModelId
                                 });
-                                setAppSettings(updated);
-                                alert("Settings saved successfully!");
-                                // Aggiungi qui un feedback visivo se vuoi
+
+                                const newEndpoint = endpoints.find(e => e.id === selectedEndpointId);
+                                const newModel = models.find(m => m.id === selectedModelId);
+
+                                setAppSettings(prev => ({
+                                  ...prev,
+                                  url: selectedEndpointId ? endpoints.find(e => e.id === selectedEndpointId)?.url || prev.url : prev.url,
+                                  modelName: selectedModelId ? models.find(m => m.id === selectedModelId)?.modelName || prev.modelName : prev.modelName
+                                }));
+                                
+                                setSelectedEndpointId(newEndpoint?.id || null);
+                                setSelectedModelId(newModel?.id || null);
                               } catch (error) {
                                 console.error("Failed to save settings:", error);
                               }
                             }}
-                            className={`${'px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg'}`}>
+                            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg"
+                          >
                             Save Configuration
                           </button>
                         </div>
