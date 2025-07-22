@@ -1,7 +1,7 @@
 # 🤖 AiWorld  
 **Your private AI playground. Run your own LLMs locally with 100% privacy.**
 
-![.NET Core](https://img.shields.io/badge/.NET%20Core-8.0-blue) ![React](https://img.shields.io/badge/React-18.2.0-blue) ![Platform](https://img.shields.io/badge/platform-Desktop%20App-lightgrey) ![License](https://img.shields.io/badge/License-Apache%202.0-green) ![Status](https://img.shields.io/badge/status-Work%20In%20Progress-yellow) ![Privacy](https://img.shields.io/badge/privacy-100%25%20guaranteed-success) ![Made with ❤️](https://img.shields.io/badge/made%20with-%E2%9D%A4-red)
+![.NET Core](https://img.shields.io/badge/.NET%20Core-8.0-blue) ![React](https://img.shields.io/badge/React-18.2.0-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![Status](https://img.shields.io/badge/status-Work%20In%20Progress-yellow) ![Privacy](https://img.shields.io/badge/privacy-100%25%20guaranteed-success) ![Made with ❤️](https://img.shields.io/badge/made%20with-%E2%9D%A4-red)
 
 ---
 
